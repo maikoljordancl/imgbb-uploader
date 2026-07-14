@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ImgBB Uploader – Ordenado (iOS)</title>
+    <title>ImgBB Uploader – Ordenado (base64)</title>
     <style>
         :root {
             --bg: #0f172a; --surface: #1e293b; --surface2: #273449; --border: #334155;
@@ -32,10 +32,10 @@
         }
         .btn:disabled { opacity:0.4; pointer-events:none; }
         .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
-        .btn-danger { background:var(--danger); color:white; border:none; }
+        .btn-danger { background:var(--danger); color:white; }
         .drop-zone {
             border:2px dashed var(--border); border-radius:var(--radius); padding:30px 20px;
-            text-align:center; background:var(--surface2); transition:0.2s; cursor:pointer;
+            text-align:center; background:var(--surface2); cursor:pointer;
         }
         .drop-zone.drag-over { border-color:var(--accent); background:#1e3348; }
         .image-list {
@@ -179,7 +179,7 @@
                 }
             });
 
-            // Test de clave mejorado
+            // Test de clave con base64 directo
             testKeyBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
                 if (!key) { testResult.innerHTML = '<span class="error-text">Ingresa una clave</span>'; return; }
@@ -187,15 +187,12 @@
                 testKeyBtn.textContent = '⏳';
                 testResult.innerHTML = 'Probando...';
 
-                const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-                const byteString = atob(base64);
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-                const blob = new Blob([ab], { type: 'image/png' });
+                // Miniatura 1x1 píxel PNG en base64 (sin prefijo)
+                const testBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
                 const form = new FormData();
                 form.append('key', key);
-                form.append('image', blob, 'test.png');
+                form.append('image', testBase64);
+                form.append('name', 'test.png');
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', 'https://api.imgbb.com/1/upload');
@@ -204,20 +201,16 @@
                     if (xhr.readyState === 4) {
                         testKeyBtn.disabled = false;
                         testKeyBtn.textContent = '🔍 Probar';
-                        if (xhr.status === 0) {
-                            testResult.innerHTML = '<span class="error-text">Error de conexión</span>';
-                        } else {
-                            try {
-                                const data = JSON.parse(xhr.responseText);
-                                if (data.success) {
-                                    testResult.innerHTML = '<span style="color:var(--success);">✅ Clave válida</span>';
-                                    toast('Clave válida');
-                                } else {
-                                    testResult.innerHTML = `<span class="error-text">❌ ${data.status_txt || 'Error'}</span>`;
-                                }
-                            } catch (e) {
-                                testResult.innerHTML = '<span class="error-text">Respuesta inválida</span>';
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                testResult.innerHTML = '<span style="color:var(--success);">✅ Clave válida</span>';
+                                toast('Clave válida');
+                            } else {
+                                testResult.innerHTML = `<span class="error-text">❌ ${data.status_txt || 'Error'}</span>`;
                             }
+                        } catch (e) {
+                            testResult.innerHTML = '<span class="error-text">Respuesta inválida</span>';
                         }
                     }
                 };
@@ -225,6 +218,11 @@
                     testKeyBtn.disabled = false;
                     testKeyBtn.textContent = '🔍 Probar';
                     testResult.innerHTML = '<span class="error-text">Tiempo agotado</span>';
+                };
+                xhr.onerror = () => {
+                    testKeyBtn.disabled = false;
+                    testKeyBtn.textContent = '🔍 Probar';
+                    testResult.innerHTML = '<span class="error-text">Error de conexión</span>';
                 };
                 xhr.send(form);
             });
@@ -328,8 +326,22 @@
                 progressText.textContent = 'Subida cancelada';
             });
 
-            // Subida robusta
-            uploadBtn.addEventListener('click', () => {
+            // Convertir archivo a base64 (sin prefijo data:...)
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const dataUrl = reader.result;
+                        const base64 = dataUrl.split(',')[1];
+                        resolve(base64);
+                    };
+                    reader.onerror = () => reject(new Error('Error al leer archivo'));
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Subida con base64
+            uploadBtn.addEventListener('click', async () => {
                 const key = apiKeyInput.value.trim();
                 if (!key) return toast('⚠️ API Key requerida');
                 if (!files.length) return;
@@ -347,7 +359,7 @@
                 let index = 0;
                 const total = files.length;
 
-                function uploadNext() {
+                async function uploadNext() {
                     if (cancelUpload || index >= total) {
                         if (cancelUpload) progressText.textContent = 'Cancelado';
                         else progressText.textContent = results.some(r => r.error) ? 'Completado con errores' : '✅ Subida completa';
@@ -359,58 +371,60 @@
                     }
 
                     const entry = files[index];
-                    progressText.textContent = `Subiendo ${index+1}/${total}: ${entry.file.name}`;
-                    const form = new FormData();
-                    form.append('key', key);
-                    form.append('image', entry.file, entry.file.name);
+                    progressText.textContent = `Convirtiendo ${index+1}/${total}: ${entry.file.name}`;
+                    try {
+                        const base64 = await fileToBase64(entry.file);
+                        if (cancelUpload) return;
+                        progressText.textContent = `Subiendo ${index+1}/${total}: ${entry.file.name}`;
 
-                    currentXHR = new XMLHttpRequest();
-                    currentXHR.open('POST', 'https://api.imgbb.com/1/upload');
-                    currentXHR.timeout = 40000; // 40 segundos máximo
+                        const form = new FormData();
+                        form.append('key', key);
+                        form.append('image', base64);
+                        form.append('name', entry.file.name);
 
-                    currentXHR.onreadystatechange = () => {
-                        if (currentXHR.readyState === 4) {
-                            if (currentXHR.status === 0 && !cancelUpload) {
-                                // Error de red o abort
-                                results.push({ url: null, name: entry.file.name, error: 'Error de red o timeout' });
-                            } else if (currentXHR.status >= 200 && currentXHR.status < 300) {
-                                try {
-                                    const data = JSON.parse(currentXHR.responseText);
-                                    if (data.success) {
-                                        results.push({
-                                            url: data.data.url,
-                                            thumb: data.data.thumb?.url || data.data.url,
-                                            name: entry.file.name
-                                        });
+                        await new Promise((resolve, reject) => {
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', 'https://api.imgbb.com/1/upload');
+                            xhr.timeout = 60000; // 60 segundos
+
+                            xhr.onreadystatechange = () => {
+                                if (xhr.readyState === 4) {
+                                    if (xhr.status === 0 && !cancelUpload) {
+                                        reject(new Error('Error de red'));
+                                    } else if (xhr.status >= 200 && xhr.status < 300) {
+                                        try {
+                                            const data = JSON.parse(xhr.responseText);
+                                            if (data.success) {
+                                                results.push({
+                                                    url: data.data.url,
+                                                    thumb: data.data.thumb?.url || data.data.url,
+                                                    name: entry.file.name
+                                                });
+                                            } else {
+                                                reject(new Error(data.status_txt || 'Error ImgBB'));
+                                            }
+                                        } catch (e) {
+                                            reject(new Error('Respuesta inválida'));
+                                        }
                                     } else {
-                                        results.push({
-                                            url: null,
-                                            name: entry.file.name,
-                                            error: data.status_txt || 'Error ImgBB'
-                                        });
+                                        reject(new Error(`HTTP ${xhr.status}`));
                                     }
-                                } catch (e) {
-                                    results.push({ url: null, name: entry.file.name, error: 'Respuesta inválida' });
+                                    resolve();
                                 }
-                            } else {
-                                results.push({ url: null, name: entry.file.name, error: `HTTP ${currentXHR.status}` });
-                            }
-                            index++;
-                            progressBar.style.width = `${Math.round((index/total)*100)}%`;
-                            currentXHR = null;
-                            uploadNext();
-                        }
-                    };
+                            };
+                            xhr.ontimeout = () => reject(new Error('Tiempo agotado (60s)'));
+                            xhr.onerror = () => reject(new Error('Error de conexión'));
+                            currentXHR = xhr;
+                            xhr.send(form);
+                        });
+                    } catch (err) {
+                        results.push({ url: null, name: entry.file.name, error: err.message });
+                    }
 
-                    currentXHR.ontimeout = () => {
-                        results.push({ url: null, name: entry.file.name, error: 'Tiempo agotado (40s)' });
-                        currentXHR = null;
-                        index++;
-                        progressBar.style.width = `${Math.round((index/total)*100)}%`;
-                        uploadNext();
-                    };
-
-                    currentXHR.send(form);
+                    index++;
+                    progressBar.style.width = `${Math.round((index/total)*100)}%`;
+                    currentXHR = null;
+                    uploadNext();
                 }
 
                 uploadNext();

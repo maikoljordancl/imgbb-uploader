@@ -17,7 +17,6 @@
             --accent-glow: rgba(56, 189, 248, 0.25);
             --success: #34d399;
             --danger: #f87171;
-            --warning: #fbbf24;
             --radius: 14px;
             --radius-sm: 10px;
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -55,7 +54,6 @@
             padding: 10px 0 40px;
         }
 
-        /* Header */
         .header {
             text-align: center;
             padding: 10px 0;
@@ -87,7 +85,6 @@
             margin-top: 2px;
         }
 
-        /* Cards */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -116,11 +113,11 @@
             text-transform: uppercase;
         }
 
-        /* Inputs */
         .input-group {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .input-group input {
             flex: 1;
@@ -141,6 +138,13 @@
         }
         .input-group input::placeholder {
             color: #64748b;
+        }
+        .api-status {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--success);
         }
 
         .btn {
@@ -220,7 +224,6 @@
             border-color: var(--danger);
         }
 
-        /* Drop Zone */
         .drop-zone {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
@@ -257,7 +260,6 @@
             display: none;
         }
 
-        /* Image list / gallery */
         .image-list {
             display: flex;
             flex-direction: column;
@@ -354,7 +356,6 @@
             flex-shrink: 0;
         }
 
-        /* Progress */
         .progress-container {
             margin-top: 8px;
         }
@@ -379,7 +380,6 @@
             margin-top: 4px;
         }
 
-        /* Results */
         .results {
             display: flex;
             flex-direction: column;
@@ -421,9 +421,6 @@
         }
         .result-item .res-link:hover {
             text-decoration: underline;
-        }
-        .result-item .btn-copy {
-            flex-shrink: 0;
         }
 
         .toast {
@@ -489,22 +486,19 @@
                 height: 42px;
                 border-radius: 6px;
             }
-            .image-item .info .filename {
-                font-size: 0.78rem;
-            }
             .btn {
                 padding: 10px 16px;
                 font-size: 0.85rem;
             }
             .input-group {
                 flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="logo">
                 <span class="icon">🖼️</span>
@@ -513,25 +507,24 @@
             <p class="subtitle">Sube múltiples imágenes en orden y obtén sus enlaces</p>
         </div>
 
-        <!-- API Key Card -->
+        <!-- API Key Card (ya incluida) -->
         <div class="card">
             <div class="card-header">
                 🔑 <span>API Key</span>
-                <span class="badge">ImgBB</span>
+                <span class="badge">Configurada</span>
+                <span class="api-status" id="apiStatus">✅ Lista</span>
             </div>
             <div class="input-group">
                 <input
                 type="text"
                 id="apiKeyInput"
-                placeholder="Pega tu API key de ImgBB aquí..."
+                placeholder="API Key de ImgBB..."
                 autocomplete="off"
                 />
-                <button class="btn btn-outline btn-sm" id="saveKeyBtn" title="Guardar en el navegador">💾 Guardar</button>
-                <button class="btn btn-outline btn-sm" id="clearKeyBtn" title="Borrar key guardada">🗑️</button>
+                <button class="btn btn-outline btn-sm" id="saveKeyBtn" title="Guardar en el navegador">💾 Guardar otra</button>
             </div>
             <p style="font-size:0.75rem;color:var(--text2);margin-top:8px;">
-                Obtén tu API key gratis en
-                <a href="https://api.imgbb.com/" target="_blank" rel="noopener" style="color:var(--accent);">api.imgbb.com</a>
+                La API Key ya está configurada. Puedes cambiarla si lo deseas.
             </p>
         </div>
 
@@ -542,7 +535,6 @@
                 <span id="imageCount" style="font-size:0.8rem;color:var(--text2);">(0 imágenes)</span>
             </div>
 
-            <!-- Drop Zone -->
             <div class="drop-zone" id="dropZone">
                 <span class="drop-icon">📁</span>
                 <p>Arrastra y suelta tus imágenes aquí</p>
@@ -551,7 +543,6 @@
             </div>
             <input type="file" id="fileInput" accept="image/*" multiple />
 
-            <!-- Image List -->
             <div class="image-list" id="imageList" style="margin-top:16px;">
                 <div class="empty-state" id="emptyState">
                     <span class="emoji">🖼️</span>
@@ -559,7 +550,6 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center;">
                 <button class="btn btn-primary" id="uploadBtn" disabled>
                     🚀 Subir imágenes a ImgBB
@@ -570,7 +560,6 @@
                 <span id="statusText" style="font-size:0.8rem;color:var(--text2);"></span>
             </div>
 
-            <!-- Progress -->
             <div class="progress-container" id="progressContainer" style="display:none;">
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progressBar"></div>
@@ -596,10 +585,13 @@
 
     <script>
         (function() {
+            // --- API Key predefinida ---
+            const DEFAULT_API_KEY = 'a00d0bb92322960a98bd90284078bcbc';
+
             // --- DOM Elements ---
             const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiStatus = document.getElementById('apiStatus');
             const saveKeyBtn = document.getElementById('saveKeyBtn');
-            const clearKeyBtn = document.getElementById('clearKeyBtn');
             const dropZone = document.getElementById('dropZone');
             const browseLink = document.getElementById('browseLink');
             const fileInput = document.getElementById('fileInput');
@@ -619,33 +611,39 @@
             const copyAllHTMLBtn = document.getElementById('copyAllHTMLBtn');
 
             // --- State ---
-            let imageFiles = []; // Array of { id, file, objectURL }
-            let uploadResults = []; // Array of { url, thumb, name }
+            let imageFiles = [];
+            let uploadResults = [];
             let nextId = 0;
             let draggedIndex = null;
 
-            // --- Load API Key from localStorage ---
-            const savedKey = localStorage.getItem('imgbb_api_key');
-            if (savedKey) {
-                apiKeyInput.value = savedKey;
+            // --- Inicializar API Key ---
+            function initializeApiKey() {
+                const savedKey = localStorage.getItem('imgbb_api_key');
+                if (savedKey) {
+                    apiKeyInput.value = savedKey;
+                    apiStatus.innerHTML = '✅ Guardada';
+                } else {
+                    apiKeyInput.value = DEFAULT_API_KEY;
+                    apiStatus.innerHTML = '✅ Predeterminada';
+                    localStorage.setItem('imgbb_api_key', DEFAULT_API_KEY);
+                }
             }
+            initializeApiKey();
 
-            // --- Save / Clear API Key ---
+            // --- Guardar API Key personalizada ---
             saveKeyBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
                 if (key) {
                     localStorage.setItem('imgbb_api_key', key);
+                    apiStatus.innerHTML = '✅ Guardada';
                     showToast('✅ API Key guardada en el navegador');
                 } else {
                     localStorage.removeItem('imgbb_api_key');
-                    showToast('API Key vacía, se eliminó del almacenamiento');
+                    apiKeyInput.value = DEFAULT_API_KEY;
+                    localStorage.setItem('imgbb_api_key', DEFAULT_API_KEY);
+                    apiStatus.innerHTML = '✅ Predeterminada';
+                    showToast('API Key restaurada a la predeterminada');
                 }
-            });
-
-            clearKeyBtn.addEventListener('click', () => {
-                localStorage.removeItem('imgbb_api_key');
-                apiKeyInput.value = '';
-                showToast('🗑️ API Key eliminada');
             });
 
             // --- File Selection ---
@@ -662,7 +660,6 @@
                 }
             });
 
-            // --- Drag & Drop from OS ---
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('drag-over');
@@ -673,14 +670,10 @@
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('drag-over');
-                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith(
-                'image/'));
-                if (files.length > 0) {
-                    addFiles(files);
-                }
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                if (files.length > 0) addFiles(files);
             });
 
-            // --- Paste from clipboard ---
             document.addEventListener('paste', (e) => {
                 const items = e.clipboardData?.items;
                 if (!items) return;
@@ -696,7 +689,6 @@
                 }
             });
 
-            // --- Add files to state ---
             function addFiles(files) {
                 const validFiles = files.filter(f => {
                     if (!f.type.startsWith('image/')) return false;
@@ -708,12 +700,11 @@
                 });
 
                 for (const file of validFiles) {
-                    const entry = {
+                    imageFiles.push({
                         id: nextId++,
                         file: file,
                         objectURL: URL.createObjectURL(file),
-                    };
-                    imageFiles.push(entry);
+                    });
                 }
 
                 if (validFiles.length > 0) {
@@ -725,16 +716,14 @@
                 }
             }
 
-            // --- Render image list with drag & drop ---
             function renderImageList() {
                 imageList.innerHTML = '';
-
                 if (imageFiles.length === 0) {
                     imageList.innerHTML = `
-                            <div class="empty-state" id="emptyState">
-                                <span class="emoji">🖼️</span>
-                                No hay imágenes cargadas aún
-                            </div>`;
+                        <div class="empty-state" id="emptyState">
+                            <span class="emoji">🖼️</span>
+                            No hay imágenes cargadas aún
+                        </div>`;
                     imageCountSpan.textContent = '(0 imágenes)';
                     uploadBtn.disabled = true;
                     clearAllBtn.disabled = true;
@@ -753,26 +742,23 @@
                     item.dataset.id = entry.id;
 
                     const sizeMB = (entry.file.size / (1024 * 1024)).toFixed(2);
-                    const sizeStr = entry.file.size > 1024 * 1024 ?
-                        `${sizeMB} MB` :
-                        `${(entry.file.size / 1024).toFixed(1)} KB`;
+                    const sizeStr = entry.file.size > 1024 * 1024 ? `${sizeMB} MB` : `${(entry.file.size / 1024).toFixed(1)} KB`;
 
                     item.innerHTML = `
-                            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
-                            <span class="index-num">${index + 1}</span>
-                            <img class="thumb" src="${entry.objectURL}" alt="thumb" loading="lazy" />
-                            <div class="info">
-                                <div class="filename" title="${escapeHTML(entry.file.name)}">${escapeHTML(entry.file.name)}</div>
-                                <div class="filesize">${sizeStr}</div>
-                            </div>
-                            <div class="actions">
-                                <button class="btn-icon" data-action="move-up" data-index="${index}" title="Subir posición">▲</button>
-                                <button class="btn-icon" data-action="move-down" data-index="${index}" title="Bajar posición">▼</button>
-                                <button class="btn-icon danger" data-action="remove" data-index="${index}" title="Eliminar">✕</button>
-                            </div>
-                        `;
+                        <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+                        <span class="index-num">${index + 1}</span>
+                        <img class="thumb" src="${entry.objectURL}" alt="thumb" loading="lazy" />
+                        <div class="info">
+                            <div class="filename" title="${escapeHTML(entry.file.name)}">${escapeHTML(entry.file.name)}</div>
+                            <div class="filesize">${sizeStr}</div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-icon" data-action="move-up" data-index="${index}" title="Subir posición">▲</button>
+                            <button class="btn-icon" data-action="move-down" data-index="${index}" title="Bajar posición">▼</button>
+                            <button class="btn-icon danger" data-action="remove" data-index="${index}" title="Eliminar">✕</button>
+                        </div>
+                    `;
 
-                    // Drag events
                     item.addEventListener('dragstart', handleDragStart);
                     item.addEventListener('dragover', handleDragOver);
                     item.addEventListener('dragenter', handleDragEnter);
@@ -780,7 +766,6 @@
                     item.addEventListener('drop', handleDrop);
                     item.addEventListener('dragend', handleDragEnd);
 
-                    // Click events for buttons
                     item.addEventListener('click', (e) => {
                         const btn = e.target.closest('[data-action]');
                         if (!btn) return;
@@ -797,55 +782,33 @@
                 });
             }
 
-            // --- Drag & Drop handlers for reordering ---
             function handleDragStart(e) {
                 draggedIndex = parseInt(this.dataset.index);
                 this.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', draggedIndex);
-                // Small hack for Firefox
-                if (e.dataTransfer.setDragImage && this.querySelector('.thumb')) {
-                    // Use default
-                }
             }
-
-            function handleDragOver(e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-            }
-
+            function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
             function handleDragEnter(e) {
                 e.preventDefault();
-                const targetIndex = parseInt(this.dataset.index);
-                if (targetIndex !== draggedIndex) {
-                    this.classList.add('drag-over-target');
-                }
+                if (parseInt(this.dataset.index) !== draggedIndex) this.classList.add('drag-over-target');
             }
-
-            function handleDragLeave(e) {
-                this.classList.remove('drag-over-target');
-            }
-
+            function handleDragLeave(e) { this.classList.remove('drag-over-target'); }
             function handleDrop(e) {
                 e.preventDefault();
                 this.classList.remove('drag-over-target');
                 const targetIndex = parseInt(this.dataset.index);
-                if (draggedIndex !== null && targetIndex !== draggedIndex) {
-                    reorderImages(draggedIndex, targetIndex);
-                }
+                if (draggedIndex !== null && targetIndex !== draggedIndex) reorderImages(draggedIndex, targetIndex);
                 draggedIndex = null;
             }
-
             function handleDragEnd(e) {
                 this.classList.remove('dragging');
-                document.querySelectorAll('.image-item').forEach(el => el.classList.remove(
-                'drag-over-target'));
+                document.querySelectorAll('.image-item').forEach(el => el.classList.remove('drag-over-target'));
                 draggedIndex = null;
             }
 
-            function reorderImages(fromIndex, toIndex) {
-                const [moved] = imageFiles.splice(fromIndex, 1);
-                imageFiles.splice(toIndex, 0, moved);
+            function reorderImages(from, to) {
+                const [moved] = imageFiles.splice(from, 1);
+                imageFiles.splice(to, 0, moved);
                 renderImageList();
                 uploadResults = [];
                 resultsCard.style.display = 'none';
@@ -860,18 +823,14 @@
 
             function removeImage(index) {
                 const entry = imageFiles[index];
-                if (entry && entry.objectURL) {
-                    URL.revokeObjectURL(entry.objectURL);
-                }
+                if (entry?.objectURL) URL.revokeObjectURL(entry.objectURL);
                 imageFiles.splice(index, 1);
                 renderImageList();
                 uploadResults = [];
                 resultsCard.style.display = 'none';
                 resultsList.innerHTML = '';
-                statusText.textContent = '';
             }
 
-            // --- Clear All ---
             clearAllBtn.addEventListener('click', () => {
                 if (imageFiles.length === 0) return;
                 if (confirm(`¿Eliminar las ${imageFiles.length} imágenes de la lista?`)) {
@@ -888,12 +847,10 @@
                 }
             });
 
-            // --- Upload to ImgBB ---
             uploadBtn.addEventListener('click', async () => {
                 const apiKey = apiKeyInput.value.trim();
                 if (!apiKey) {
                     showToast('⚠️ Primero ingresa tu API Key de ImgBB');
-                    apiKeyInput.focus();
                     return;
                 }
                 if (imageFiles.length === 0) {
@@ -901,9 +858,7 @@
                     return;
                 }
 
-                // Auto-save key
                 localStorage.setItem('imgbb_api_key', apiKey);
-
                 uploadBtn.disabled = true;
                 clearAllBtn.disabled = true;
                 statusText.textContent = 'Subiendo...';
@@ -926,13 +881,11 @@
                     try {
                         const base64 = await fileToBase64(entry.file);
                         const result = await uploadToImgBB(apiKey, base64, entry.file.name);
-
-                        if (result && result.success && result.data) {
+                        if (result?.success && result.data) {
                             uploadResults.push({
                                 url: result.data.url,
                                 thumb: result.data.thumb?.url || result.data.url,
                                 name: entry.file.name,
-                                displayUrl: result.data.display_url || result.data.url,
                             });
                         } else {
                             throw new Error(result?.status_txt || 'Error desconocido');
@@ -946,40 +899,22 @@
                             error: err.message || 'Error al subir',
                         });
                     }
-
                     completed++;
                     progressBar.style.width = `${Math.round((completed / total) * 100)}%`;
                 }
 
-                progressText.textContent = hasErrors ?
-                    `${completed} de ${total} procesadas (con errores)` :
-                    `✅ ${total} de ${total} imágenes subidas`;
+                progressText.textContent = hasErrors ? `${completed} procesadas (con errores)` : `✅ ${total} imágenes subidas`;
                 progressBar.style.width = '100%';
-
-                // Show results
                 renderResults();
-
-                statusText.textContent = hasErrors ?
-                    'Completado con algunos errores. Revisa los resultados.' :
-                    '✅ Todas las imágenes subidas exitosamente.';
+                statusText.textContent = hasErrors ? 'Completado con errores.' : '✅ Todas las imágenes subidas.';
                 uploadBtn.disabled = false;
                 clearAllBtn.disabled = false;
-
-                // Hide progress after a moment
-                setTimeout(() => {
-                    if (progressBar.style.width === '100%') {
-                        // Keep it visible a bit
-                    }
-                }, 1500);
             });
 
             function fileToBase64(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = () => {
-                        // The result includes "data:image/...;base64," prefix - ImgBB accepts this
-                        resolve(reader.result);
-                    };
+                    reader.onload = () => resolve(reader.result);
                     reader.onerror = () => reject(new Error('Error al leer el archivo'));
                     reader.readAsDataURL(file);
                 });
@@ -988,155 +923,98 @@
             async function uploadToImgBB(apiKey, base64Image, name) {
                 const formData = new FormData();
                 formData.append('key', apiKey);
-                // Remove the data URL prefix for the API
                 const base64Clean = base64Image.replace(/^data:image\/\w+;base64,/, '');
                 formData.append('image', base64Clean);
-                if (name) {
-                    formData.append('name', name);
-                }
-
-                const response = await fetch('https://api.imgbb.com/1/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
+                if (name) formData.append('name', name);
+                const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
                 if (!response.ok) {
                     const text = await response.text();
                     throw new Error(`HTTP ${response.status}: ${text.substring(0, 150)}`);
                 }
-
                 const data = await response.json();
-                if (!data.success) {
-                    throw new Error(data.status_txt || 'Error del servidor ImgBB');
-                }
+                if (!data.success) throw new Error(data.status_txt || 'Error del servidor ImgBB');
                 return data;
             }
 
-            // --- Render Results ---
             function renderResults() {
                 resultsList.innerHTML = '';
                 resultsCard.style.display = 'block';
-
                 if (uploadResults.length === 0) {
                     resultsCard.style.display = 'none';
                     return;
                 }
-
                 uploadResults.forEach((res, index) => {
                     const item = document.createElement('div');
                     item.className = 'result-item';
-
                     if (res.error) {
-                        item.innerHTML = `
-                                <span class="res-num" style="color:var(--danger);">${index + 1}</span>
-                                <span style="flex:1;color:var(--danger);font-size:0.85rem;">❌ ${escapeHTML(res.name)}: ${escapeHTML(res.error)}</span>
-                            `;
+                        item.innerHTML = `<span class="res-num" style="color:var(--danger);">${index + 1}</span>
+                            <span style="flex:1;color:var(--danger);">❌ ${escapeHTML(res.name)}: ${escapeHTML(res.error)}</span>`;
                     } else {
-                        item.innerHTML = `
-                                <span class="res-num">${index + 1}</span>
-                                <img class="res-thumb" src="${res.thumb}" alt="thumb" loading="lazy" onerror="this.style.display='none'" />
-                                <a class="res-link" href="${res.url}" target="_blank" rel="noopener">${res.url}</a>
-                                <button class="btn btn-outline btn-xs btn-copy" data-url="${escapeHTML(res.url)}" title="Copiar link">📋</button>
-                            `;
-
-                        // Copy button
+                        item.innerHTML = `<span class="res-num">${index + 1}</span>
+                            <img class="res-thumb" src="${res.thumb}" alt="thumb" onerror="this.style.display='none'" />
+                            <a class="res-link" href="${res.url}" target="_blank">${res.url}</a>
+                            <button class="btn btn-outline btn-xs btn-copy" data-url="${escapeHTML(res.url)}">📋</button>`;
                         item.querySelector('.btn-copy')?.addEventListener('click', function(e) {
                             e.stopPropagation();
-                            const url = this.dataset.url;
-                            copyToClipboard(url);
-                            showToast('📋 Link copiado al portapapeles');
+                            copyToClipboard(this.dataset.url);
+                            showToast('📋 Link copiado');
                         });
                     }
-
                     resultsList.appendChild(item);
                 });
-
-                // Scroll to results
                 resultsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            // --- Copy All buttons ---
             copyAllBtn.addEventListener('click', () => {
                 const urls = uploadResults.filter(r => r.url).map(r => r.url);
-                if (urls.length === 0) {
-                    showToast('⚠️ No hay links para copiar');
-                    return;
-                }
+                if (!urls.length) { showToast('⚠️ No hay links'); return; }
                 copyToClipboard(urls.join('\n'));
-                showToast(`📋 ${urls.length} links copiados al portapapeles`);
+                showToast(`📋 ${urls.length} links copiados`);
             });
-
             copyAllBBCodeBtn.addEventListener('click', () => {
-                const bbcodeLines = uploadResults.filter(r => r.url).map(r => `[img]${r.url}[/img]`);
-                if (bbcodeLines.length === 0) {
-                    showToast('⚠️ No hay links para copiar');
-                    return;
-                }
-                copyToClipboard(bbcodeLines.join('\n'));
-                showToast(`📋 ${bbcodeLines.length} links BBCode copiados`);
+                const lines = uploadResults.filter(r => r.url).map(r => `[img]${r.url}[/img]`);
+                if (!lines.length) { showToast('⚠️ No hay links'); return; }
+                copyToClipboard(lines.join('\n'));
+                showToast(`📋 ${lines.length} BBCode copiados`);
             });
-
             copyAllHTMLBtn.addEventListener('click', () => {
-                const htmlLines = uploadResults.filter(r => r.url).map(r =>
-                    `<img src="${r.url}" alt="${escapeHTML(r.name)}" />`);
-                if (htmlLines.length === 0) {
-                    showToast('⚠️ No hay links para copiar');
-                    return;
-                }
-                copyToClipboard(htmlLines.join('\n'));
-                showToast(`📋 ${htmlLines.length} tags HTML copiados`);
+                const lines = uploadResults.filter(r => r.url).map(r => `<img src="${r.url}" alt="${escapeHTML(r.name)}" />`);
+                if (!lines.length) { showToast('⚠️ No hay links'); return; }
+                copyToClipboard(lines.join('\n'));
+                showToast(`📋 ${lines.length} HTML copiados`);
             });
 
-            // --- Utility functions ---
             function copyToClipboard(text) {
                 if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).catch(() => {
-                        fallbackCopy(text);
-                    });
+                    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
                 } else {
                     fallbackCopy(text);
                 }
             }
-
             function fallbackCopy(text) {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 textarea.style.position = 'fixed';
                 textarea.style.left = '-9999px';
-                textarea.style.top = '-9999px';
                 document.body.appendChild(textarea);
-                textarea.focus();
                 textarea.select();
-                try {
-                    document.execCommand('copy');
-                } catch (e) {
-                    // ignore
-                }
+                try { document.execCommand('copy'); } catch (e) {}
                 document.body.removeChild(textarea);
             }
-
             function escapeHTML(str) {
                 const div = document.createElement('div');
                 div.textContent = str;
                 return div.innerHTML;
             }
-
             function showToast(message) {
-                // Remove existing toasts
-                const existing = document.querySelectorAll('.toast');
-                existing.forEach(t => t.remove());
-
+                document.querySelectorAll('.toast').forEach(t => t.remove());
                 const toast = document.createElement('div');
                 toast.className = 'toast';
                 toast.textContent = message;
                 document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                }, 2700);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2700);
             }
 
-            // --- Initial render ---
             renderImageList();
         })();
     </script>

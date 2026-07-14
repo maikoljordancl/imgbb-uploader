@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ImgBB Uploader - Ordenado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ImgBB Uploader – Ordenado</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -20,44 +20,33 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             background-image: radial-gradient(ellipse at 20% 20%, rgba(56,189,248,0.06) 0%, transparent 55%),
                               radial-gradient(ellipse at 80% 70%, rgba(56,189,248,0.04) 0%, transparent 55%);
             color: var(--text);
             min-height: 100vh;
+            padding: 16px;
             display: flex;
             justify-content: center;
-            padding: 20px;
         }
         .container {
             max-width: 820px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            padding-bottom: 40px;
-        }
-        .header {
-            text-align: center;
-        }
-        .header .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 20px;
+            padding-bottom: 30px;
         }
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 22px;
+            padding: 20px 18px;
         }
         .input-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -68,26 +57,30 @@
             border: 1px solid var(--border);
             background: var(--surface2);
             color: var(--text);
+            font-size: 0.95rem;
             outline: none;
+            -webkit-appearance: none;
         }
         .btn {
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: var(--radius-sm);
             border: none;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-        }
-        .btn:disabled {
-            opacity: 0.45;
-            pointer-events: none;
-        }
-        .btn-primary {
             background: var(--accent);
             color: #0c1a2b;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
         }
         .btn-outline {
             background: transparent;
@@ -97,11 +90,11 @@
         .drop-zone {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
-            padding: 40px;
+            padding: 30px 20px;
             text-align: center;
             background: var(--surface2);
-            cursor: pointer;
             transition: 0.2s;
+            cursor: pointer;
         }
         .drop-zone.drag-over {
             border-color: var(--accent);
@@ -111,37 +104,72 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 400px;
+            max-height: 380px;
             overflow-y: auto;
-            margin-top: 16px;
+            margin-top: 14px;
+            -webkit-overflow-scrolling: touch;
         }
         .image-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--surface2);
-            padding: 10px;
-            border-radius: var(--radius-sm);
-            border: 1px solid transparent;
-            cursor: grab;
-            user-select: none;
-        }
-        .image-item:hover { border-color: var(--border); }
-        .image-item .index { font-weight: 700; color: var(--accent); min-width: 24px; }
-        .image-item img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
-        .image-item .name { flex: 1; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .results { display: flex; flex-direction: column; gap: 8px; }
-        .result-item {
             display: flex;
             align-items: center;
             gap: 10px;
             background: var(--surface2);
             padding: 10px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
+            border: 1px solid transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
         }
-        .result-item .num { font-weight: 700; color: var(--success); min-width: 24px; }
-        .result-item a { color: var(--accent); word-break: break-all; font-size: 0.85rem; }
+        .image-item .index {
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 24px;
+            text-align: center;
+        }
+        .image-item img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #0f172a;
+        }
+        .image-item .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .image-item .file-name {
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .result-item .num {
+            font-weight: 700;
+            color: var(--success);
+            min-width: 24px;
+        }
+        .result-item a {
+            color: var(--accent);
+            word-break: break-all;
+            flex: 1;
+            text-decoration: none;
+        }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -150,73 +178,75 @@
             background: #1e293b;
             color: #e2e8f0;
             padding: 12px 24px;
-            border-radius: 20px;
+            border-radius: 30px;
             border: 1px solid var(--success);
-            z-index: 999;
-            animation: fadeInOut 2.5s ease;
+            z-index: 9999;
+            font-weight: 500;
+            animation: toast 2.5s ease forwards;
+            pointer-events: none;
         }
-        @keyframes fadeInOut {
+        @keyframes toast {
             0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; }
-            100% { opacity: 0; }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
         }
-        .error-message { color: var(--danger); font-size: 0.8rem; margin-top: 4px; }
+        .error-text { color: var(--danger); font-size: 0.8rem; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo"><span>🖼️</span> ImgBB Uploader</div>
-            <p style="color:var(--text2);">Sube imágenes en orden y obtén los links</p>
+        <div style="text-align:center; margin-top: 8px;">
+            <div style="font-size: 1.8rem; font-weight: 700;">🖼️ ImgBB Uploader</div>
+            <div style="color:var(--text2); font-size:0.9rem;">Sube imágenes en orden y obtén los enlaces</div>
         </div>
 
         <!-- API Key -->
         <div class="card">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                 <span>🔑 API Key</span>
                 <span id="apiStatus" style="color:var(--success); font-size:0.8rem;">✅ Lista</span>
             </div>
             <div class="input-group">
-                <input type="text" id="apiKeyInput" placeholder="Tu API Key de ImgBB" />
-                <button class="btn btn-outline" id="saveKeyBtn">💾 Guardar</button>
-                <button class="btn btn-outline" id="testKeyBtn">🔍 Probar</button>
+                <input type="text" id="apiKeyInput" placeholder="Tu API Key" autocomplete="off" autocorrect="off" />
+                <button class="btn btn-outline" id="saveKeyBtn" style="font-size:0.8rem;">💾 Guardar</button>
+                <button class="btn btn-outline" id="testKeyBtn" style="font-size:0.8rem;">🔍 Probar</button>
             </div>
-            <p style="font-size:0.75rem; color:var(--text2); margin-top:8px;">Clave incluida: 7199773e48b68ee866c35917bd2e1e82</p>
+            <div style="font-size:0.7rem; color:var(--text2); margin-top:6px;">Clave incluida: 7199773e48b68ee866c35917bd2e1e82</div>
         </div>
 
         <!-- Subida -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <span>📤 Imágenes <span id="imageCount">(0)</span></span>
             </div>
             <div class="drop-zone" id="dropZone">
-                <div style="font-size:2.5rem;">📁</div>
-                <p>Arrastra imágenes aquí o <span id="browseLink" style="color:var(--accent); text-decoration:underline;">selecciónalas</span></p>
+                <div style="font-size:2.2rem;">📁</div>
+                <p>Arrastra o toca para seleccionar</p>
                 <p style="font-size:0.7rem;">JPG, PNG, GIF, WEBP · Máx 32MB</p>
             </div>
             <input type="file" id="fileInput" accept="image/*" multiple hidden />
             <div class="image-list" id="imageList"></div>
-            <div style="display: flex; gap: 10px; margin-top: 16px;">
-                <button class="btn btn-primary" id="uploadBtn" disabled>🚀 Subir</button>
+            <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                <button class="btn" id="uploadBtn" disabled>🚀 Subir</button>
                 <button class="btn btn-outline" id="clearAllBtn" disabled>🗑️ Limpiar</button>
             </div>
             <div id="progressContainer" style="display:none; margin-top:12px;">
-                <div style="background:var(--surface2); border-radius:10px; height:6px; overflow:hidden;">
-                    <div id="progressBar" style="width:0%; height:100%; background:var(--accent); transition: width 0.3s;"></div>
+                <div style="background:var(--surface2); border-radius:8px; height:6px; overflow:hidden;">
+                    <div id="progressBar" style="width:0%; height:100%; background:var(--accent); transition: width 0.2s;"></div>
                 </div>
-                <p id="progressText" style="text-align:center; font-size:0.8rem; margin-top:4px;"></p>
+                <div id="progressText" style="text-align:center; font-size:0.75rem; margin-top:4px;"></div>
             </div>
         </div>
 
         <!-- Resultados -->
         <div class="card" id="resultsCard" style="display:none;">
-            <div style="margin-bottom:12px;">✅ <span>Enlaces generados (en orden)</span></div>
+            <div style="margin-bottom:10px;">✅ <span>Enlaces generados (en orden)</span></div>
             <div class="results" id="resultsList"></div>
-            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-                <button class="btn btn-outline" id="copyAllBtn">📋 Copiar links</button>
-                <button class="btn btn-outline" id="copyBBBtn">📋 BBCode</button>
-                <button class="btn btn-outline" id="copyHTMLBtn">📋 HTML</button>
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                <button class="btn btn-outline" id="copyAllBtn" style="font-size:0.75rem;">📋 Links</button>
+                <button class="btn btn-outline" id="copyBBBtn" style="font-size:0.75rem;">📋 BBCode</button>
+                <button class="btn btn-outline" id="copyHTMLBtn" style="font-size:0.75rem;">📋 HTML</button>
             </div>
         </div>
     </div>
@@ -229,7 +259,6 @@
             const saveKeyBtn = document.getElementById('saveKeyBtn');
             const testKeyBtn = document.getElementById('testKeyBtn');
             const dropZone = document.getElementById('dropZone');
-            const browseLink = document.getElementById('browseLink');
             const fileInput = document.getElementById('fileInput');
             const imageList = document.getElementById('imageList');
             const imageCount = document.getElementById('imageCount');
@@ -247,11 +276,12 @@
             let files = [];
             let results = [];
             let idCounter = 0;
+            let draggedIdx = null;
 
-            // Cargar clave guardada
-            const saved = localStorage.getItem('imgbb_api_key');
-            apiKeyInput.value = saved || DEFAULT_KEY;
-            apiStatus.textContent = saved ? '✅ Guardada' : '✅ Predeterminada';
+            // Cargar API Key
+            const savedKey = localStorage.getItem('imgbb_api_key');
+            apiKeyInput.value = savedKey || DEFAULT_KEY;
+            apiStatus.textContent = savedKey ? '✅ Guardada' : '✅ Predeterminada';
 
             saveKeyBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
@@ -266,41 +296,57 @@
                 }
             });
 
-            // Test de clave (solicitud ligera)
-            testKeyBtn.addEventListener('click', async () => {
+            // Test de clave compatible con Safari (sin canvas)
+            testKeyBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
                 if (!key) return toast('⚠️ Ingresa una clave');
                 testKeyBtn.disabled = true;
-                testKeyBtn.textContent = '⏳ Probando...';
-                try {
-                    // Enviamos un archivo mínimo válido (1x1 píxel PNG)
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 1;
-                    canvas.height = 1;
-                    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-                    const form = new FormData();
-                    form.append('key', key);
-                    form.append('image', blob, 'test.png');
-                    const resp = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
-                    const data = await resp.json();
-                    if (data.success) {
-                        toast('✅ Clave válida');
-                    } else {
-                        toast('❌ ' + (data.status_txt || 'Error desconocido'));
-                    }
-                } catch (err) {
-                    toast('❌ Error de red: ' + err.message);
-                    console.error(err);
-                } finally {
-                    testKeyBtn.disabled = false;
-                    testKeyBtn.textContent = '🔍 Probar';
+                testKeyBtn.textContent = '⏳';
+                // Crear un Blob de 1x1 píxel PNG manualmente (base64 decodificado)
+                const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+                const byteString = atob(base64);
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
                 }
+                const blob = new Blob([ab], { type: 'image/png' });
+                const form = new FormData();
+                form.append('key', key);
+                form.append('image', blob, 'test.png');
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'https://api.imgbb.com/1/upload');
+                xhr.onload = () => {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            toast('✅ Clave válida');
+                        } else {
+                            toast('❌ ' + (data.status_txt || 'Error'));
+                        }
+                    } catch (e) {
+                        toast('❌ Error al interpretar respuesta');
+                    }
+                    resetTestButton();
+                };
+                xhr.onerror = () => {
+                    toast('❌ Error de red');
+                    resetTestButton();
+                };
+                xhr.ontimeout = () => {
+                    toast('❌ Tiempo agotado');
+                    resetTestButton();
+                };
+                xhr.send(form);
             });
+            function resetTestButton() {
+                testKeyBtn.disabled = false;
+                testKeyBtn.textContent = '🔍 Probar';
+            }
 
-            // Gestión de archivos
+            // Gestión de archivos táctil y arrastre
             dropZone.addEventListener('click', () => fileInput.click());
-            browseLink.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
-
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length) {
                     addFiles(Array.from(fileInput.files));
@@ -308,7 +354,10 @@
                 }
             });
 
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
             dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
@@ -318,12 +367,15 @@
                 else toast('⚠️ No se detectaron imágenes');
             });
 
+            // Pegar desde portapapeles (compatible iOS)
             document.addEventListener('paste', (e) => {
                 const items = e.clipboardData?.items;
                 if (!items) return;
                 const imgItems = [];
                 for (const item of items) {
-                    if (item.type.startsWith('image/')) imgItems.push(item.getAsFile());
+                    if (item.type.startsWith('image/')) {
+                        imgItems.push(item.getAsFile());
+                    }
                 }
                 if (imgItems.length) {
                     e.preventDefault();
@@ -362,36 +414,26 @@
                 files.forEach((f, idx) => {
                     const div = document.createElement('div');
                     div.className = 'image-item';
-                    div.draggable = true;
                     div.dataset.index = idx;
+
                     div.innerHTML = `
-                        <span style="cursor:grab;">⋮</span>
+                        <span style="cursor:grab; font-size:1.1rem;">⋮</span>
                         <span class="index">${idx+1}</span>
-                        <img src="${f.objectURL}" alt="thumb" />
-                        <span class="name">${escapeHTML(f.file.name)}</span>
-                        <span style="font-size:0.7rem;color:var(--text2);">${(f.file.size/1024).toFixed(1)} KB</span>
+                        <img src="${f.objectURL}" alt="mini" />
+                        <div class="file-info">
+                            <div class="file-name">${escapeHTML(f.file.name)}</div>
+                            <div style="font-size:0.7rem; color:var(--text2);">${(f.file.size/1024).toFixed(1)} KB</div>
+                        </div>
                         <button class="btn btn-outline" data-action="up" data-index="${idx}" style="padding:4px 8px;">▲</button>
                         <button class="btn btn-outline" data-action="down" data-index="${idx}" style="padding:4px 8px;">▼</button>
-                        <button class="btn btn-outline" data-action="remove" data-index="${idx}" style="color:var(--danger);padding:4px 8px;">✕</button>
+                        <button class="btn btn-outline" data-action="remove" data-index="${idx}" style="color:var(--danger); padding:4px 8px;">✕</button>
                     `;
 
-                    div.addEventListener('dragstart', (e) => {
-                        draggedIdx = idx;
-                        div.classList.add('dragging');
-                    });
-                    div.addEventListener('dragover', (e) => e.preventDefault());
-                    div.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        const target = parseInt(div.dataset.index);
-                        if (draggedIdx !== undefined && target !== draggedIdx) {
-                            reorder(draggedIdx, target);
-                        }
-                        draggedIdx = undefined;
-                    });
-                    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+                    // Soporte táctil para reordenar (simple, sin drag & drop complejo en iOS)
                     div.addEventListener('click', (e) => {
                         const btn = e.target.closest('[data-action]');
                         if (!btn) return;
+                        e.stopPropagation();
                         const idx = parseInt(btn.dataset.index);
                         if (btn.dataset.action === 'up') move(idx, -1);
                         else if (btn.dataset.action === 'down') move(idx, 1);
@@ -401,18 +443,16 @@
                     imageList.appendChild(div);
                 });
             }
-            let draggedIdx;
 
-            function reorder(from, to) {
-                const [moved] = files.splice(from, 1);
-                files.splice(to, 0, moved);
-                renderFiles();
-                results = [];
-                resultsCard.style.display = 'none';
-            }
             function move(idx, dir) {
                 const newIdx = idx + dir;
-                if (newIdx >= 0 && newIdx < files.length) reorder(idx, newIdx);
+                if (newIdx >= 0 && newIdx < files.length) {
+                    const [moved] = files.splice(idx, 1);
+                    files.splice(newIdx, 0, moved);
+                    renderFiles();
+                    results = [];
+                    resultsCard.style.display = 'none';
+                }
             }
             function removeFile(idx) {
                 URL.revokeObjectURL(files[idx].objectURL);
@@ -424,15 +464,15 @@
 
             clearAllBtn.addEventListener('click', () => {
                 if (!files.length) return;
-                if (confirm('¿Borrar todas las imágenes de la lista?')) {
+                if (confirm('¿Eliminar todas las imágenes?')) {
                     files.forEach(f => URL.revokeObjectURL(f.objectURL));
                     files = [];
                     renderFiles();
                 }
             });
 
-            // Subida de imágenes
-            uploadBtn.addEventListener('click', async () => {
+            // Subida con XMLHttpRequest (progreso real, compatible iOS)
+            uploadBtn.addEventListener('click', () => {
                 const key = apiKeyInput.value.trim();
                 if (!key) return toast('⚠️ API Key requerida');
                 if (!files.length) return;
@@ -444,32 +484,92 @@
                 progressText.textContent = `0 / ${files.length}`;
                 results = [];
                 resultsList.innerHTML = '';
+                resultsCard.style.display = 'none';
 
-                for (let i = 0; i < files.length; i++) {
-                    const entry = files[i];
-                    progressText.textContent = `Subiendo ${i+1}/${files.length}: ${entry.file.name}`;
-                    try {
-                        const form = new FormData();
-                        form.append('key', key);
-                        form.append('image', entry.file, entry.file.name);
-                        const resp = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
-                        const data = await resp.json();
-                        if (data.success) {
-                            results.push({ url: data.data.url, thumb: data.data.thumb?.url || data.data.url, name: entry.file.name });
-                        } else {
-                            throw new Error(data.status_txt || 'Error de ImgBB');
-                        }
-                    } catch (err) {
-                        results.push({ url: null, name: entry.file.name, error: err.message });
-                        console.error(`Fallo al subir ${entry.file.name}:`, err);
+                let completed = 0;
+                const total = files.length;
+
+                function uploadNext(index) {
+                    if (index >= total) {
+                        // Finalizado
+                        progressText.textContent = results.some(r => r.error) ? 'Completado con errores' : '✅ Subida completa';
+                        uploadBtn.disabled = false;
+                        clearAllBtn.disabled = false;
+                        renderResults();
+                        return;
                     }
-                    progressBar.style.width = `${Math.round(((i+1)/files.length)*100)}%`;
+
+                    const entry = files[index];
+                    progressText.textContent = `Subiendo ${index+1}/${total}: ${entry.file.name}`;
+
+                    const form = new FormData();
+                    form.append('key', key);
+                    form.append('image', entry.file, entry.file.name);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://api.imgbb.com/1/upload');
+
+                    xhr.onload = () => {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                results.push({
+                                    url: data.data.url,
+                                    thumb: data.data.thumb?.url || data.data.url,
+                                    name: entry.file.name
+                                });
+                            } else {
+                                results.push({
+                                    url: null,
+                                    name: entry.file.name,
+                                    error: data.status_txt || 'Error de ImgBB'
+                                });
+                            }
+                        } catch (e) {
+                            results.push({
+                                url: null,
+                                name: entry.file.name,
+                                error: 'Respuesta inválida'
+                            });
+                        }
+                        completed++;
+                        progressBar.style.width = `${Math.round((completed/total)*100)}%`;
+                        uploadNext(index + 1);
+                    };
+
+                    xhr.onerror = () => {
+                        results.push({
+                            url: null,
+                            name: entry.file.name,
+                            error: 'Error de red'
+                        });
+                        completed++;
+                        progressBar.style.width = `${Math.round((completed/total)*100)}%`;
+                        uploadNext(index + 1);
+                    };
+
+                    xhr.ontimeout = () => {
+                        results.push({
+                            url: null,
+                            name: entry.file.name,
+                            error: 'Tiempo agotado'
+                        });
+                        completed++;
+                        progressBar.style.width = `${Math.round((completed/total)*100)}%`;
+                        uploadNext(index + 1);
+                    };
+
+                    // Progreso individual (opcional, no se usa para la barra global)
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            // Podríamos ajustar barra más fina, pero mantenemos simplicidad
+                        }
+                    };
+
+                    xhr.send(form);
                 }
 
-                progressText.textContent = results.every(r => r.url) ? '✅ Subida completa' : 'Completado con errores';
-                renderResults();
-                uploadBtn.disabled = false;
-                clearAllBtn.disabled = false;
+                uploadNext(0);
             });
 
             function renderResults() {
@@ -480,10 +580,10 @@
                     div.className = 'result-item';
                     if (r.error) {
                         div.innerHTML = `<span class="num" style="color:var(--danger);">${i+1}</span>
-                            <span style="color:var(--danger);">❌ ${escapeHTML(r.name)}: ${escapeHTML(r.error)}</span>`;
+                            <span class="error-text">❌ ${escapeHTML(r.name)}: ${escapeHTML(r.error)}</span>`;
                     } else {
                         div.innerHTML = `<span class="num">${i+1}</span>
-                            <img src="${r.thumb}" style="width:32px;height:32px;border-radius:4px;" onerror="this.style.display='none'" />
+                            <img src="${r.thumb}" style="width:28px; height:28px; border-radius:4px;" onerror="this.style.display='none'" />
                             <a href="${r.url}" target="_blank">${r.url}</a>
                             <button class="btn btn-outline copy-single" data-url="${escapeHTML(r.url)}" style="padding:4px 8px;">📋</button>`;
                         div.querySelector('.copy-single').addEventListener('click', function(e) {
@@ -518,8 +618,8 @@
             });
 
             function copyText(text) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {}).catch(() => fallbackCopy(text));
                 } else {
                     fallbackCopy(text);
                 }
@@ -529,9 +629,11 @@
                 ta.value = text;
                 ta.style.position = 'fixed';
                 ta.style.left = '-9999px';
+                ta.style.top = '0';
                 document.body.appendChild(ta);
+                ta.focus();
                 ta.select();
-                document.execCommand('copy');
+                try { document.execCommand('copy'); } catch (e) {}
                 document.body.removeChild(ta);
             }
             function escapeHTML(str) {
@@ -546,7 +648,7 @@
                 t.className = 'toast';
                 t.textContent = msg;
                 document.body.appendChild(t);
-                setTimeout(() => t.remove(), 2500);
+                setTimeout(() => t.remove(), 2600);
             }
 
             renderFiles();
